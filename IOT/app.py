@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = 'agritechlite!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 sensor_data = {
