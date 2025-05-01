@@ -8,8 +8,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 sensor_data = {
     "cahaya": 0,
     "suhu": 0,
-    "kelembapan": 0,
-    "hujan": 0
+    "kelembapan_udara": 0,
+    "hujan": 0,
+    "kelembapan_tanah": 0
 }
 pompa_status = "OFF"
 
@@ -20,20 +21,27 @@ def index():
 @app.route('/data', methods=['POST'])
 def receive_data():
     global sensor_data
-    sensor_data = request.get_json()
-    socketio.emit('update_sensor', sensor_data)  # Kirim update ke semua client
-    return "OK", 200
+    try:
+        sensor_data = request.get_json()
+        socketio.emit('update_sensor', sensor_data)
+        return "OK", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 400
 
-@app.route('/control', methods=['POST'])
-def control():
+@app.route('/pompa', methods=['POST'])
+def control_pompa():
     global pompa_status
-    action = request.form['action']
+    action = request.form.get('action', '')
     if action == "ON":
         pompa_status = "ON"
     elif action == "OFF":
         pompa_status = "OFF"
     socketio.emit('update_pompa', {"pompa_status": pompa_status})
-    return render_template('index.html', pompa_status=pompa_status)
+    return '', 204  # Tidak perlu render ulang halaman
+
+@app.route('/pompa/status', methods=['GET'])
+def get_pompa_status():
+    return pompa_status, 200
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000)
