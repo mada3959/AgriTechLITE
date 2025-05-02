@@ -64,7 +64,7 @@
             <ul class="list-group">
                 <li class="list-group-item">Cahaya: <span id="cahaya">-</span> %</li>
                 <li class="list-group-item">Suhu: <span id="suhu">-</span> °C</li>
-                <li class="list-group-item">Kelembapan Udara: <span id="kelembapan_udara">-</span></li>
+                <li class="list-group-item">Kelembapan Udara: <span id="kelembapan_udara">-</span> %</li>
                 <li class="list-group-item">Hujan: <span id="hujan">-</span> %</li>
                 <li class="list-group-item">Kelembapan Tanah: <span id="kelembapan_tanah">-</span> %</li>
             </ul>
@@ -126,19 +126,15 @@
     });
 
     function predictTanaman() {
-        fetch('/predict')
-            .then(response => response.json())
-            .then(data => {
-                if (data.class) {
-                    document.getElementById('hasil_prediksi').textContent = data.class;
-                } else if (data.error) {
-                    document.getElementById('hasil_prediksi').textContent = "Error: " + data.error;
-                }
-            })
-            .catch(err => {
-                document.getElementById('hasil_prediksi').textContent = "Gagal memuat prediksi.";
-                console.error(err);
-            });
+        document.getElementById('hasil_prediksi').textContent = "Memproses...";
+        fetch('/ML', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+
     }
 </script>
 
