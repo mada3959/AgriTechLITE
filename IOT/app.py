@@ -45,7 +45,7 @@ def create_tables_and_load_data():
             for row in reader:
                 plant = Plant(
                     name=row['name'],
-                    image_url=row['image_url'],
+                    #image_url=row['image_url'],
                     overview=row['overview'],
                     tools=row['tools_materials'],
                     harvest=row['harvest_method'],
@@ -108,7 +108,7 @@ def predict():
         if matched_plant:
             return jsonify({
                 'class': matched_plant.name,
-                'image_url': matched_plant.image_url,
+                #'image_url': matched_plant.image_url,
                 'overview': matched_plant.overview,
                 'tools': matched_plant.tools,
                 'harvest': matched_plant.harvest,
