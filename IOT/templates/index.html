@@ -49,10 +49,20 @@
             <h5 class="card-title">Rekomendasi Tanaman</h5>
             <p class="card-text">Klik tombol di bawah untuk memprediksi tanaman yang cocok berdasarkan data sensor saat ini.</p>
             <div class="d-grid gap-2">
-                <button class="btn btn-success" onclick="predictTanaman()">Prediksi Rekomendasi Tanaman yang Dapat Ditanam</button>
-            </div>
-            <div class="mt-3">
-                <strong>Hasil Prediksi:</strong> <span id="hasil_prediksi">-</span>
+                <button class="btn btn-primary" onclick="predictTanaman()">Prediksi Rekomendasi Tanaman</button>
+                <p class="mt-3">Dari data sensor yang terdeteksi pada kondisi lingkungan tanaman yang seperti ini, anda bisa menanam <strong><span id="hasil_prediksi">-</span></strong></p>
+                <div id="info_tanaman" class="mt-4" style="display: none;">
+                    <h5>Informasi Tanaman</h5>
+                    <img id="gambar_tanaman" src="" class="img-fluid mb-2" style="max-height: 200px;">
+                    <p><strong>Nama:</strong> <span id="nama_tanaman"></span></p>
+                    <p><strong>Deskripsi:</strong> <span id="overview"></span></p>
+                    <p><strong>Alat & Bahan:</strong> <span id="tools"></span></p>
+                    <p><strong>Cara Panen:</strong> <span id="harvest"></span></p>
+                    <p><strong>Perawatan:</strong> <span id="maintenance"></span></p>
+                    <p><strong>Jika Sakit:</strong> <span id="illness"></span></p>
+                    <p><strong>Tips Lahan Sempit:</strong> <span id="small_land_tips"></span></p>
+                    <p><strong>Hari Panen:</strong> <span id="harvest_day"></span></p>
+                </div>
             </div>
         </div>
     </div>
@@ -126,16 +136,50 @@
     });
 
     function predictTanaman() {
-        document.getElementById('hasil_prediksi').textContent = "Memproses...";
+    // Ambil data sensor dari elemen DOM
+        let sensorData = {
+            suhu: parseFloat(document.getElementById('suhu').textContent),
+            kelembapan_udara: parseFloat(document.getElementById('kelembapan_udara').textContent),
+            hujanV: parseFloat(document.getElementById('hujan').textContent),
+            humtanah: parseFloat(document.getElementById('kelembapan_tanah').textContent)
+        };
+
         fetch('/ML', {
-            method: "POST",
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({})
+            body: JSON.stringify(sensorData)  // Kirim data sensor yang terkini ke Flask
         })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);  // Debug log untuk melihat respons
+            // Tampilkan hasil prediksi di halaman
+            if (data.class) {
+                document.getElementById('hasil_prediksi').textContent = data.class;
+                if (data.image_url) {
+                    document.getElementById('gambar_tanaman').src = data.image_url;
+                }
+                document.getElementById('nama_tanaman').textContent = data.class;
+                document.getElementById('overview').textContent = data.overview;
+                document.getElementById('tools').textContent = data.tools;
+                document.getElementById('harvest').textContent = data.harvest;
+                document.getElementById('maintenance').textContent = data.maintenance;
+                document.getElementById('illness').textContent = data.illness;
+                document.getElementById('small_land_tips').textContent = data.small_land_tips;
+                document.getElementById('harvest_day').textContent = data.harvest_day;
 
+                document.getElementById('info_tanaman').style.display = 'block';
+            } else {
+                document.getElementById('hasil_prediksi').textContent = 'Tanaman tidak dapat ditemukan.';
+                document.getElementById('info_tanaman').style.display = 'none';
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+        });
     }
+
 </script>
 
 </body>
