@@ -26,21 +26,7 @@
 
     <!-- Warning Box -->
     <div id="warning-box" class="warning" style="display: none;">
-          Tanah kering! Segera siram tanaman!
-    </div>
-
-    <!-- Sensor Data -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Data Sensor</h5>
-            <ul class="list-group">
-                <li class="list-group-item">Cahaya: <span id="cahaya">-</span> %</li>
-                <li class="list-group-item">Suhu: <span id="suhu">-</span> °C</li>
-                <li class="list-group-item">Kelembapan Udara: <span id="kelembapan_udara">-</span> %</li>
-                <li class="list-group-item">Hujan: <span id="hujan">-</span> %</li>
-                <li class="list-group-item">Kelembapan Tanah: <span id="kelembapan_tanah">-</span> %</li>
-            </ul>
-        </div>
+        Tanah kering! Segera siram tanaman!
     </div>
 
     <!-- Pompa Control -->
@@ -55,14 +41,38 @@
                 Status Pompa: <strong id="pompa_status">{{ pompa_status }}</strong>
             </p>
         </div>
-    </div>    
+    </div> 
+
+    <!-- Sensor Data -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Data Sensor</h5>
+            <ul class="list-group">
+                <li class="list-group-item">Cahaya: <span id="cahaya">-</span> %</li>
+                <li class="list-group-item">Suhu: <span id="suhu">-</span> °C</li>
+                <li class="list-group-item">Kelembapan Udara: <span id="kelembapan_udara">-</span></li>
+                <li class="list-group-item">Hujan: <span id="hujan">-</span> %</li>
+                <li class="list-group-item">Kelembapan Tanah: <span id="kelembapan_tanah">-</span> %</li>
+            </ul>
+        </div>
+    </div>
+
 </div>
 
 <script>
     var socket = io();
     var switchElem = document.getElementById('pompaSwitch');
+    let ignoreSwitchChange = false;
 
-    // Update data sensor dan status pompa dari server
+    // Ambil status awal pompa saat halaman dimuat
+    fetch("/pompa/status")
+        .then(response => response.text())
+        .then(status => {
+            document.getElementById('pompa_status').textContent = status;
+            switchElem.checked = status === "ON";
+        });
+
+    // Update data sensor dari server
     socket.on('update_sensor', function(data) {
         document.getElementById('cahaya').textContent = data.cahaya;
         document.getElementById('suhu').textContent = data.suhu;
@@ -77,13 +87,19 @@
         }
     });
 
+    // Update status pompa dari server tanpa mengganggu input user
     socket.on('update_pompa', function(data) {
         document.getElementById('pompa_status').textContent = data.pompa_status;
+
+        ignoreSwitchChange = true;
         switchElem.checked = data.pompa_status === "ON";
+        ignoreSwitchChange = false;
     });
 
-    // Saat switch diubah, kirim permintaan ke server
+    // Kirim perubahan status pompa ke server saat user ubah switch
     switchElem.addEventListener('change', function() {
+        if (ignoreSwitchChange) return;
+
         var action = this.checked ? "ON" : "OFF";
 
         fetch("/pompa", {
