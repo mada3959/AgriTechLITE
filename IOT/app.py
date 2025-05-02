@@ -32,16 +32,15 @@ def receive_data():
 def control_pompa():
     global pompa_status
     action = request.form.get('action', '')
-    if action == "ON":
-        pompa_status = "ON"
-    elif action == "OFF":
-        pompa_status = "OFF"
-    socketio.emit('update_pompa', {"pompa_status": pompa_status})
-    return '', 204  # Tidak perlu render ulang halaman
+    if action in ["ON", "OFF"]:
+        pompa_status = action
+        socketio.emit('update_pompa', {"pompa_status": pompa_status})
+        return '', 204
+    return 'Invalid Action', 400
 
 @app.route('/pompa/status', methods=['GET'])
 def get_pompa_status():
     return pompa_status, 200
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=5000)
+   socketio.run(app, host="0.0.0.0", port=5000, debug=True)
