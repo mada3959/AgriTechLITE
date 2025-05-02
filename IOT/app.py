@@ -40,7 +40,7 @@ pompa_status = "OFF"
 def create_tables_and_load_data():
     db.create_all()
     if not Plant.query.first():
-        with open(r'C:\Users\ACER\Documents\Arduino\AgriTechLITE\plants-information.csv', newline='', encoding='utf-8') as csvfile:
+        with open('plants-information.csv', newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 plant = Plant(
